@@ -11,32 +11,32 @@ CERTS ?= elasticsearch
 
 ENV ?= staging
 
-all: 										## (default) Create Kubernetes cluster, local registry, build docker images and deploy
+all:                     ## (default) Create Kubernetes cluster, local registry, build docker images and deploy
 all: cluster docker deploy bootstrap
 	$(MAKE) port-forward
 
-clean: 									## Delete Kind Cluster and dependencies
+clean:                   ## Delete Kind Cluster and dependencies
 clean: delete-cluster delete-secrets
 
-cluster:  							## Set up Kubernetes cluster with all dependencies
+cluster:                 ## Set up Kubernetes cluster with all dependencies
 cluster: kind docker-registry cluster-config
 
-delete-cluster:  				## Delete Kubernetes cluster and its dependencies
+delete-cluster:          ## Delete Kubernetes cluster and its dependencies
 delete-cluster: delete-kind delete-docker-registry
 
-cluster-config: 				## Configure Kubernetes cluster
+cluster-config:          ## Configure Kubernetes cluster
 	@echo "Configuring cluster..."; \
 	{ docker network connect "kind" "$(REGISTRY_NAME)" || true; } &&\
 		kubectl --context "kind-$(CLUSTER_NAME)" apply -f "$(CLUSTER_REGISTRY_CONFIG)" &&\
 			echo OK
 
-kind: 									## Create Kind Kubernetes cluster
+kind:                    ## Create Kind Kubernetes cluster
 	@kind create cluster --config "$(KIND_CONFIG)" --image "$(KIND_IMAGE)"
 
-delete-kind: undeploy		## Delete Kind Kubernetes cluster
+delete-kind: undeploy    ## Delete Kind Kubernetes cluster
 	@kind delete cluster --name "$(CLUSTER_NAME)"
 
-docker-registry:				## Create local Docker Registry
+docker-registry:         ## Create local Docker Registry
 	@echo "Creating Docker Registry..."; \
 	running="$$(docker inspect -f '{{.State.Running}}' "$(REGISTRY_NAME)" 2>/dev/null || true)" &&\
 		if [ "$$running" != 'true' ]; then \
@@ -46,13 +46,13 @@ docker-registry:				## Create local Docker Registry
 					echo OK; \
 		fi
 
-delete-docker-registry: ## Delete local Docker Registry
+delete-docker-registry:  ## Delete local Docker Registry
 	@echo "Deleting Docker Registry..."; \
 	docker stop "$(REGISTRY_NAME)" &&\
 		docker rm "$(REGISTRY_NAME)" &&\
 			echo OK || true
 
-port-forward:						## Forward Kibana port to localhost from Kubernetes service
+port-forward:            ## Forward Kibana port to localhost from Kubernetes service
 	@echo -e "\nYou can access Kibana at http://localhost:5601\n\n\
 Access credentials for user 'elastic': \n\
 $$(cat kustomize/overlays/$(ENV)/secrets/elasticsearch/secret.env | grep ELASTIC_PASSWORD)\n\
@@ -88,7 +88,7 @@ undeploy:
 # This is naive implementation of bootstrap logic just for demo purposes
 # It is destructive and does not care about existing data.
 # kubectl delete cm -n $(ENV) -l "app.kubernetes.io/name=elasticsearch-env" 
-bootstrap:							## Bootstrap Elasticsearch cluster
+bootstrap:               ## Bootstrap Elasticsearch cluster
 	@echo "Bootstrapping cluster..."; \
 		BOOTSTRAP_CLUSTER=true \
 			kubectl apply -k kustomize/overlays/$(ENV) &&\
@@ -132,7 +132,7 @@ kustomize/overlays/$(ENV)/secrets/certs/%: kustomize/overlays/$(ENV)/secrets/cer
 						openssl x509  -noout -text -in "$${NAME}.crt" &&\
 							echo OK
 
-delete-secrets:					## Cleanup temporary files with secrets
+delete-secrets:          ## Cleanup temporary files with secrets
 	@echo "Removing secrets..."; \
 	rm -rfv kustomize/overlays/$(ENV)/secrets &&\
 		echo OK
@@ -146,5 +146,5 @@ kustomize/overlays/$(ENV)/secrets/elasticsearch:
 	printf "%s=%s\n" KIBANA_USER kibana_file_user >> "$@/kibana.env"
 
 
-help: 									## Show help message
+help:                    ## Show help message
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m\033[0m\n"} /^[$$()% 0-9a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)

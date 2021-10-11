@@ -1,0 +1,17 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: elasticsearch
+  labels:
+    app.kubernetes.io/name: elasticsearch
+spec:
+  selector:
+    app.kubernetes.io/name: elasticsearch
+  clusterIP: None
+  ports:
+    - port: 9200
+      targetPort: http
+      name: http
+    - port: 9300
+      name: transport
+      targetPort: transport

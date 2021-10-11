@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+commonLabels:
+  app.kubernetes.io/instance: default
+
+resources:
+- resources/namespace.yaml
+- resources/default-cpu.limitrange.yaml
+- resources/default-mem.limitrange.yaml
+
+# These labels will not be added to Selector
+transformers:
+- |-
+  apiVersion: builtin
+  kind: LabelTransformer
+  metadata:
+    name: commonLabelsNoSelector
+  labels:
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/component: base
+    app.kubernetes.io/part-of: base
+    app.kubernetes.io/managed-by: kustomize
+  fieldSpecs:
+  - path: metadata/labels
+  - path: spec/template/metadata/labels
+

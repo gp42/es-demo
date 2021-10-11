@@ -1,0 +1,6 @@
+# Kibana config
+elasticsearch.ssl.certificate: /etc/kibana/certs/tls.crt
+elasticsearch.ssl.key:  /etc/kibana/certs/tls.key
+elasticsearch.ssl.certificateAuthorities: /etc/kibana/certs/ca.crt
+elasticsearch.username: "${ELASTICSEARCH_KIBANA_USER}"
+elasticsearch.password: "${ELASTICSEARCH_KIBANA_PASSWORD}"

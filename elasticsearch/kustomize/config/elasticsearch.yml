@@ -1,0 +1,5 @@
+node.name:    "${HOSTNAME}"
+cluster.name: "elasticsearch-cluster"
+network.host: 0.0.0.0
+discovery.seed_hosts:
+- "${DISCOVERY_SEED_HOSTS}"

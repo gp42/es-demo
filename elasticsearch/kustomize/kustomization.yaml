@@ -1,0 +1,40 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- resources/elasticsearch.statefulset.yaml
+- resources/elasticsearch.service.yaml
+
+configMapGenerator:
+- name: elasticsearch-config
+  options:
+    labels:
+      app.kubernetes.io/name: elasticsearch-config
+  files:
+  - config/elasticsearch.yml
+  - config/log4j2.properties
+- name: elasticsearch-env
+  options:
+    labels:
+      app.kubernetes.io/name: elasticsearch-env
+  envs:
+  - config/elasticsearch.env
+
+commonLabels:
+  app.kubernetes.io/instance: default
+
+# These labels will not be added to Selector
+transformers:
+- |-
+  apiVersion: builtin
+  kind: LabelTransformer
+  metadata:
+    name: commonLabelsNoSelector
+  labels:
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/component: search
+    app.kubernetes.io/part-of: elasticsearch
+    app.kubernetes.io/managed-by: kustomize
+  fieldSpecs:
+  - path: metadata/labels
+  - path: spec/template/metadata/labels

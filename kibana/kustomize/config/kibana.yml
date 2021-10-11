@@ -1,0 +1,13 @@
+# Kibana config
+logging:
+  appenders:
+    console_appender:
+      type: console
+      layout:
+        type: pattern
+        highlight: true
+  root:
+    appenders: [default, console_appender]
+    level: warn
+server.host: "0.0.0.0"
+elasticsearch.hosts: [ "${ELASTICSEARCH_HOSTS}" ]

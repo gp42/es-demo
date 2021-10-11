@@ -1,0 +1,137 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: staging
+namePrefix: staging-
+
+resources:
+- ../../base
+- ../../../elasticsearch/kustomize
+- ../../../kibana/kustomize
+
+secretGenerator:
+- name: elasticsearch-certs
+  files:
+  - secrets/certs/elasticsearch/tls.crt
+  - secrets/certs/elasticsearch/tls.key
+  - secrets/certs/cacert/ca.crt
+- name: elasticsearch-secrets
+  files:
+  - secrets/elasticsearch/secret.env
+  - secrets/elasticsearch/kibana.env
+- name: kibana-secrets
+  options:
+    labels:
+      app.kubernetes.io/name: kibana-secrets
+  envs:
+  - secrets/elasticsearch/kibana.env
+
+configMapGenerator:
+- name: elasticsearch-env
+  behavior: merge
+  envs:
+  - config/elasticsearch.env
+- name: kibana-certs-config
+  files:
+  - config/kibana-certs.yml
+
+commonLabels:
+  app.kubernetes.io/instance: staging
+
+# These labels will not be added to Selector
+transformers:
+- |-
+  apiVersion: builtin
+  kind: LabelTransformer
+  metadata:
+    name: commonLabelsNoSelector
+  labels:
+    app.kubernetes.io/part-of: elasticsearch-stack
+    app.kubernetes.io/managed-by: kustomize
+  fieldSpecs:
+  - path: metadata/labels
+  - path: spec/template/metadata/labels
+
+patches:
+  # Inject Certificate mounts
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: certs
+          mountPath: /etc/elasticsearch/certs
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: certs
+          secret:
+            secretName: elasticsearch-certs
+            defaultMode: 0400
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: secrets
+          mountPath: /var/run/secrets/elasticsearch
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: secrets
+          secret:
+            secretName: elasticsearch-secrets
+            defaultMode: 0400
+    target:
+      group: apps
+      version: v1
+      kind: StatefulSet
+      name: elasticsearch
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: certs
+          mountPath: /etc/kibana/certs
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: certs
+          secret:
+            secretName: elasticsearch-certs
+            defaultMode: 0400
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: kibana-certs-config
+          mountPath: /etc/kibana/kibana-certs.yml
+          subPath: kibana-certs.yml
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: kibana-certs-config
+          configMap:
+            name: kibana-certs-config
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: ELASTICSEARCH_KIBANA_USER
+          valueFrom:
+            secretKeyRef:
+              name: kibana-secrets
+              key: KIBANA_USER
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: ELASTICSEARCH_KIBANA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kibana-secrets
+              key: KIBANA_PASSWORD
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: EXTRA_CONFIGS
+          value: /etc/kibana/kibana-certs.yml
+    target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: kibana

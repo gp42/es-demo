@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-mem-limit-range
+  labels:
+    app.kubernetes.io/name: default-mem-limit-range
+spec:
+  limits:
+  - default:
+      memory: 1024Mi
+    defaultRequest:
+      memory: 512Mi
+    type: Container

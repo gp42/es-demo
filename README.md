@@ -31,6 +31,7 @@ Dependencies are listed below.
 * To delete cluster and dependencies run: `make clean`
 * Show available commands: `make help`
 * Forward Kibana ports: `make port-forward`
+* Lint docker image: `make docker-lint/<dir_with_Dockerfile>`
 * Build docker image: `make docker-build/<dir_with_Dockerfile>`
 * Push docker image: `make docker-push/<dir_with_Dockerfile>`
 

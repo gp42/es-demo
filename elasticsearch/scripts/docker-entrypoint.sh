@@ -18,10 +18,6 @@ do
   fi
 done < <(env)
 
-#until [ -f "/tmp/foo" ]; do
-#  sleep 5
-#done
-
 if [ "$BOOTSTRAP_CLUSTER" = "true" ]; then
   echo "BOOTSTRAP_CLUSTER is set to 'true'. Bootstrapping cluster..."
   es_opts+=("-Ecluster.initial_master_nodes=${HOSTNAME}")

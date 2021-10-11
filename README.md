@@ -25,19 +25,25 @@ Dependencies are listed below.
   - Forward ports to Kibana and provide access info
 
 **Other commands:**
+
 *cleanup*
+
 To delete cluster and dependencies run: `make clean`
 
 *help*
+
 Show available commands: `make help`
 
 *port forward*
+
 Forward Kibana ports: `make port-forward`
 
 *build image*
+
 Build docker image: `make docker-build/<dir_with_Dockerfile>`
 
 *push image*
+
 Push docker image: `make docker-push/<dir_with_Dockerfile>`
 
 ## Troubleshooting
@@ -62,18 +68,22 @@ kubectl rollout restart statefulset -n staging staging-elasticsearch
 
 ### Known Issues
 **Bootstrap is a draft**
+
 Bootstrap logic is just a draft, it does not work in all scenarios and does not care about existing
 data.
 
 **No backup**
+
 No backup is implemented. One possible scenario is to use scheduled CronJobs to trigger
 Elasticsearch snapshots to some independent backend.
 
 **Healthchecks are naive**
+
 Current healthchecks just see that the ports are listening whithout checking if application is
 healthy. This needs improvement in real scenarios.
 
 **Elasticsearch logs complain about disk watermark %**
+
 Faced this issue while running the setup on MacOS, Elasticsearch can see full disk space allocated
 to Docker Desktop. Make sure that space allocated to Docker Desktop is not full.
 

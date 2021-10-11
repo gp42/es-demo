@@ -1,5 +1,5 @@
 # Elasticsearch and Kibana demo stack
-This project runs a demo stack of Elasticsearch and Kibana on Kind-based Kubernetes.
+This project runs a demo stack of Elasticsearch and Kibana on a Kind-based Kubernetes.
 It was originally developed on Mac OSX 11.5.1 and only tested on this OS.
 Dependencies are listed below.
 

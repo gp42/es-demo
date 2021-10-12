@@ -9,7 +9,7 @@ spec:
     matchLabels:
       app.kubernetes.io/name: elasticsearch
   serviceName: "elasticsearch"
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:

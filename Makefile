@@ -87,7 +87,6 @@ undeploy:
 
 # This is naive implementation of bootstrap logic just for demo purposes
 # It is destructive and does not care about existing data.
-# kubectl delete cm -n $(ENV) -l "app.kubernetes.io/name=elasticsearch-env" 
 bootstrap:               ## Bootstrap Elasticsearch cluster
 	@echo "Bootstrapping cluster..."; \
 		BOOTSTRAP_CLUSTER=true \
@@ -137,13 +136,14 @@ delete-secrets:          ## Cleanup temporary files with secrets
 	rm -rfv kustomize/overlays/$(ENV)/secrets &&\
 		echo OK
 
+# Some naive password generation
 kustomize/overlays/$(ENV)/secrets/elasticsearch:
 	@mkdir -p "$@"; \
-	rnd() { LC_ALL=C tr -dc 'A-Za-z0-9!#&()*+,-./:;?@^_~' </dev/urandom | head -c 20; }; \
-	printf "%s=%s\n" KEYSTORE_PASSWORD $$(rnd) > "$@/secret.env"; \
-	printf "%s=%s\n" ELASTIC_PASSWORD $$(rnd) >> "$@/secret.env"; \
-	printf "%s=%s\n" KIBANA_PASSWORD $$(rnd) > "$@/kibana.env"; \
-	printf "%s=%s\n" KIBANA_USER kibana_file_user >> "$@/kibana.env"
+	rnd() { LC_ALL=C tr -dc 'A-Za-z0-9!#+,-./:_~' </dev/urandom | head -c 20; }; \
+	printf '%s=%s\n' KEYSTORE_PASSWORD $$(rnd) > "$@/secret.env"; \
+	printf '%s=%s\n' ELASTIC_PASSWORD $$(rnd) >> "$@/secret.env"; \
+	printf '%s=%s\n' KIBANA_PASSWORD $$(rnd) > "$@/kibana.env"; \
+	printf '%s=%s\n' KIBANA_USER kibana_file_user >> "$@/kibana.env"
 
 
 help:                    ## Show help message
